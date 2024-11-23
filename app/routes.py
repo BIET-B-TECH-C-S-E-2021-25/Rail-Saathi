@@ -55,11 +55,11 @@ home_bp = Blueprint('home', __name__,template_folder="templates")  # Explicit te
 def home():
     print("Home route accessed")
     print("Template folder:", home_bp.template_folder)  # Debugging line
-    # # Ensure session is active and not expired
-    # if not session.get('user_id') or not session.get('is_active'):
-    #     session.clear()  # Clear the session if user is not logged in or the session expired
-    #     flash('Your session has expired. Please log in again.', 'warning')
-    #     return redirect(url_for('login'))  # Redirect to login page
+    # Ensure session is active and not expired
+    if not session.get('user_id') or not session.get('is_active'):
+        session.clear()  # Clear the session if user is not logged in or the session expired
+        flash('Your session has expired. Please log in again.', 'warning')
+        return redirect(url_for('login'))  # Redirect to login page
 
     # # Existing POST and GET request logic here
     if request.method == 'POST':
