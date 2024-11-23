@@ -1,13 +1,52 @@
 import logging
-from flask import Blueprint, current_app, flash, render_template, redirect, request, session, url_for
+from flask import Blueprint, app, current_app, flash, render_template, redirect, request, session, url_for
 from werkzeug.security import check_password_hash
 from app import get_session_config, set_session_config
 from app import db
-from app.models import User # Import your User model
+from app.models import Train, User # Import your User model
 from sqlalchemy import or_
+from functools import wraps
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
+
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     return render_template('404.html'), 404
+
+# @app.errorhandler(500)
+# def internal_server_error(e):
+#     return render_template('500.html'), 500
+
+def get_user_by_input(user_input):
+    try:
+        # Determine input type and build query
+        query_filters = []
+        if "@" in user_input:  # Email
+            query_filters.append(User.email == user_input)
+        elif user_input.isdigit():  # Phone
+            query_filters.append(User.phone.ilike(f"{user_input}%"))
+        else:  # Username
+            query_filters.append(User.username == user_input)
+
+        if not query_filters:
+            return None
+
+        return User.query.filter(or_(*query_filters)).first()
+    except Exception as e:
+        current_app.logger.error(f"Error in user validation: {e}")
+        return None
+
+def restrict_authenticated(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Check if the user is logged in
+        if session.get('user_id') and session.get('is_active'):
+            # Redirect to homepage if logged in
+            flash("You are already logged in.", "info")
+            return redirect(url_for('home.home'))
+        return func(*args, **kwargs)
+    return wrapper
 
 # Define blueprints for different sections
 home_bp = Blueprint('home', __name__,template_folder="templates")  # Explicit template folder
@@ -16,7 +55,13 @@ home_bp = Blueprint('home', __name__,template_folder="templates")  # Explicit te
 def home():
     print("Home route accessed")
     print("Template folder:", home_bp.template_folder)  # Debugging line
-    
+    # # Ensure session is active and not expired
+    # if not session.get('user_id') or not session.get('is_active'):
+    #     session.clear()  # Clear the session if user is not logged in or the session expired
+    #     flash('Your session has expired. Please log in again.', 'warning')
+    #     return redirect(url_for('login'))  # Redirect to login page
+
+    # # Existing POST and GET request logic here
     if request.method == 'POST':
         # Extract form data
         departure_location = request.form.get('from')
@@ -47,6 +92,7 @@ def home():
 register_bp = Blueprint('register', __name__,template_folder="templates")
 
 @register_bp.route('/register', methods=['GET', 'POST'])
+@restrict_authenticated
 def register():
     # Registration logic
     if request.method == 'POST':
@@ -117,7 +163,7 @@ def search():
         travel_class = request.args.get('travel_class')
 
         # Validate query parameters
-        if not from_station or not to_station or not date or not travel_class:
+        if not all([from_station, to_station, date, travel_class]):
             flash("Invalid search parameters. Please try again.", "danger")
             # return redirect(url_for('home.home'))
             return render_template('error.html', message="Invalid search parameters.")
@@ -143,29 +189,40 @@ def search():
                 "travel_class": travel_class
             }
         ]
-
+        
         # Filter results based on travel class if necessary (mock filtering shown)
         filtered_results = [result for result in results if result['travel_class'] == travel_class]
+        
+        # Query database for train schedules
+        results = Train.query.filter(
+            Train.from_station.ilike(f"%{from_station}%"),
+            Train.to_station.ilike(f"%{to_station}%"),
+            Train.date == date,
+            Train.travel_class.ilike(f"%{travel_class}%")
+        ).paginate(page=request.args.get('page', 1, type=int), per_page=10)
         
         # Logic for handling the search query, for example, query the database or return results
         # For now, we will just print the values to the console
         print(f"Searching from {from_station} to {to_station} on {date} in class {travel_class}")
-    
+        
         # Render the search results page
         return render_template('search.html', 
                                from_station=from_station, 
                                to_station=to_station, 
                                date=date, 
-                               travel_class=travel_class, 
-                               results=filtered_results,active_page='search.search')
+                               travel_class=travel_class,
+                               results=results.items,
+                               pagination=results,
+                               active_page='search.search')
     except Exception as e:
         current_app.logger.error(f"Error in search route: {str(e)}")
         flash("There was an error processing your request. Please try again.", "danger")
-        return render_template('error.html', message="Invalid search parameters.")
+        return render_template('error.html', message="An error occurred.")
 
 login_bp = Blueprint('login', __name__,template_folder="templates")
 
 @login_bp.route('/login', methods=['GET', 'POST'], endpoint='login')  # Rename the endpoint to avoid conflicts
+@restrict_authenticated
 def login_route():
     # Login functionality
     if request.method == 'POST':
@@ -189,26 +246,14 @@ def login_route():
         
         # Check if user exists
         try:
-            # Build query filters
-            query_filters = []
-            if user_id:
-                query_filters.append(User.username == user_id)
-            if email:
-                query_filters.append(User.email == email)
-            if phone:
-                query_filters.append(User.phone.like(f"{phone}%")) # Partial match for phone
-            
-            if not query_filters:
-                flash("Invalid input. Please try again.", "danger")
-                return render_template('login.html', active_page='login.login')
-            
-            # Fetch the user from the database
-            user = User.query.filter(or_(*query_filters)).first()
-            
+            user = get_user_by_input(user_input)
             if user:
                 # Validate password
                 if check_password_hash(user.password, password):
                     session['user_id'] = user.id  # Store user ID in session
+                    session['is_active'] = True  # Mark user as active in the session
+                    user.is_active = True  # Update the database
+                    db.session.commit()
                     flash(f"Welcome back, {user.fullname}!", "success")
                     return redirect(url_for('home.home'))  # Redirect to homepage
                 else:
@@ -265,9 +310,19 @@ logout_bp=Blueprint('logout',__name__,template_folder="templates")
 def logout():
     # Logout logic
     try:
+        user_id = session.get('user_id')
+        if user_id:
+            # Update user to inactive
+            user = User.query.get(user_id)
+            if user:
+                user.is_active = False
+                db.session.commit()
+        
         # Clear the session to log out the user
         session.clear()
         flash("You have been logged out successfully.", "success")
+        # return redirect(url_for('login.login'))
+    
     except Exception as e:
         flash("An error occurred during logout. Please try again.", "danger")
         print(f"Error: {e}")  # Log the error for debugging

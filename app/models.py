@@ -1,6 +1,6 @@
 # SQLAlchemy models
 from app import db
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash,check_password_hash
 
 class User(db.Model):
     # __tablename__ = "users"  # Explicitly define table name
@@ -12,7 +12,7 @@ class User(db.Model):
     country_code = db.Column(db.String(10), nullable=False)
     phone=db.Column(db.String(15),unique=True,nullable=False, index=True)
     # Add a new column
-    is_active = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=False) # Default to active users
     session_configs = db.relationship('SessionConfig', back_populates='user', cascade="all, delete-orphan")  # Relationship to SessionConfig
     
     __table_args__ = (
@@ -20,13 +20,23 @@ class User(db.Model):
         db.UniqueConstraint('phone', name='uq_user_phone'),
     )
     
-    def __init__(self, username,fullname, password, email, country_code, phone):
+    def __init__(self, username,fullname, password, email, country_code, phone, is_active=True):
+        """
+        Initialize a User object.
+        """
         self.username = username
         self.fullname=fullname
         self.email = email
         self.country_code=country_code
         self.phone = phone
         self.password = generate_password_hash(password) # Hash the password
+        self.is_active=is_active # Default to True if not explicitly 
+        
+    def check_password(self, password):
+        """
+        Verify the password against the stored hash.
+        """
+        return check_password_hash(self.password, password)
     
     def __repr__(self):
         return f"<User {self.username}, Email: {self.email}>"

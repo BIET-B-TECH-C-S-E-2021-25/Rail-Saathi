@@ -1,13 +1,13 @@
 from waitress import serve
 from app import create_app
 from flask_migrate import Migrate
-# from app import db
+from app import db  # Make sure db is imported here
 
 # Create the app instance using the factory function
 app = create_app()
 
 # Initialize Flask-Migrate with the app and db
-# migrate = Migrate(app, db)
+migrate = Migrate(app, db)
 
 if __name__ == "__main__":
     import os
