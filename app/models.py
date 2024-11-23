@@ -3,6 +3,7 @@ from app import db
 from werkzeug.security import generate_password_hash
 
 class User(db.Model):
+    # __tablename__ = "users"  # Explicitly define table name
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     fullname = db.Column(db.String(120), nullable=False)
@@ -10,6 +11,8 @@ class User(db.Model):
     email=db.Column(db.String(120),unique=True,nullable=False,index=True)
     country_code = db.Column(db.String(10), nullable=False)
     phone=db.Column(db.String(15),unique=True,nullable=False, index=True)
+    # Add a new column
+    is_active = db.Column(db.Boolean, default=True)
     session_configs = db.relationship('SessionConfig', back_populates='user', cascade="all, delete-orphan")  # Relationship to SessionConfig
     
     __table_args__ = (
