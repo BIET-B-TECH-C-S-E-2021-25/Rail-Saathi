@@ -194,12 +194,12 @@ def search():
         filtered_results = [result for result in results if result['travel_class'] == travel_class]
         
         # Query database for train schedules
-        results = Train.query.filter(
-            Train.from_station.ilike(f"%{from_station}%"),
-            Train.to_station.ilike(f"%{to_station}%"),
-            Train.date == date,
-            Train.travel_class.ilike(f"%{travel_class}%")
-        ).paginate(page=request.args.get('page', 1, type=int), per_page=10)
+        # results = Train.query.filter(
+        #     Train.from_station.ilike(f"%{from_station}%"),
+        #     Train.to_station.ilike(f"%{to_station}%"),
+        #     Train.date == date,
+        #     Train.travel_class.ilike(f"%{travel_class}%")
+        # ).paginate(page=request.args.get('page', 1, type=int), per_page=10)
         
         # Logic for handling the search query, for example, query the database or return results
         # For now, we will just print the values to the console
@@ -211,7 +211,8 @@ def search():
                                to_station=to_station, 
                                date=date, 
                                travel_class=travel_class,
-                               results=results.items,
+                               results=filtered_results,
+                            #    results=results.items,
                                pagination=results,
                                active_page='search.search')
     except Exception as e:
