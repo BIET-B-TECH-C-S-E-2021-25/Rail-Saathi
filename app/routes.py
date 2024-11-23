@@ -59,7 +59,7 @@ def home():
     if not session.get('user_id') or not session.get('is_active'):
         session.clear()  # Clear the session if user is not logged in or the session expired
         flash('Your session has expired. Please log in again.', 'warning')
-        return redirect(url_for('login'))  # Redirect to login page
+        return redirect(url_for('login.login'))  # Redirect to login page
 
     # # Existing POST and GET request logic here
     if request.method == 'POST':
