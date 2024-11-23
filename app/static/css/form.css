@@ -55,7 +55,6 @@ input[type="email"]:focus,
 input[type="password"]:focus,
 select:focus,
 input[type="tel"]:focus {
-  border-color: #ff9800;
   outline: none;
 }
 

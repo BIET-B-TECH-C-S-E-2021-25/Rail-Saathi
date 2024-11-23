@@ -113,7 +113,7 @@ def create_app():
         if 'SECRET_KEY' not in session:
             # Use database or fallback for SECRET_KEY
             user_id = session.get('user_id', None)
-            session['SECRET_KEY'] = get_session_config('SECRET_KEY', user_id=user_id, default=app.config['SECRET_KEY'])
+            dynamic_secret_key = get_session_config('SECRET_KEY', user_id=user_id, default=app.config['SECRET_KEY'])
             
             if not dynamic_secret_key:
                 # Use fallback SECRET_KEY and store in session and DB

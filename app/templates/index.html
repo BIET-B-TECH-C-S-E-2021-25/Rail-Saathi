@@ -23,7 +23,7 @@
     </div>
 
     <!-- 2: Headline Section -->
-    <div class="main-head">
+    <div class="main-head" style="margin: 10px 33% 10px auto;">
       <h1>Book your dream journey with RailSaathi</h1>
     </div>
 
@@ -85,8 +85,7 @@
       <div class="card custom-card">
         <form class="search-bar" action="{{ url_for('home.home') }}" method="POST">
           <!-- CSRF Token -->
-           {{ form.hidden_tag() }}
-          
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
            <div class="form-group">
             <label for="from">From:</label><br />
             <input type="text" id="from" name="from" placeholder="Enter departure location" style="border: 1.5px solid #1f4e79" />
