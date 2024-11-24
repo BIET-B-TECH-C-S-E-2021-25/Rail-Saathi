@@ -55,6 +55,7 @@ home_bp = Blueprint('home', __name__,template_folder="templates")  # Explicit te
 def home():
     print("Home route accessed")
     print("Template folder:", home_bp.template_folder)  # Debugging line
+    user_logged_in = 'user_id' in session  # Example check: Replace with your logic
     # Ensure session is active and not expired
     if not session.get('user_id') or not session.get('is_active'):
         session.clear()  # Clear the session if user is not logged in or the session expired
@@ -87,7 +88,7 @@ def home():
                                 travel_class=travel_class))
 
     # Render the homepage
-    return render_template('index.html',active_page='home.home')
+    return render_template('index.html',user_logged_in=user_logged_in,active_page='home.home')
 
 register_bp = Blueprint('register', __name__,template_folder="templates")
 
@@ -334,7 +335,8 @@ contact_us_bp=Blueprint('contact_us',__name__,template_folder="templates")
 @contact_us_bp.route('/contact_us')
 def contact_us():
     # Contact us page
-    return render_template('contact-us.html', active_page='contact_us.contact_us')
+    user_logged_in = 'user_id' in session  # Example check: Replace with your logic
+    return render_template('contact-us.html', user_logged_in=user_logged_in, active_page='contact_us.contact_us')
 
 booking_bp=Blueprint('booking',__name__,template_folder="templates")
 @booking_bp.route('/booking')
@@ -352,7 +354,8 @@ dashboard_bp=Blueprint('dashboard',__name__,template_folder="templates")
 @dashboard_bp.route('/dashboard')
 def dashboard():
     # Dashboard logic
-    return render_template('dashboard.html', active_page='dashboard.dashboard')
+    user_logged_in = 'user_id' in session  # Example check: Replace with your logic
+    return render_template('dashboard.html', user_logged_in=user_logged_in,active_page='dashboard.dashboard')
 
 # Consolidate all blueprints into a list
 all_blueprints = [

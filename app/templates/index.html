@@ -54,6 +54,12 @@
                   <a class="nav-link {% if active_page == 'home.home' %}active{% endif %}" aria-current="page"
                     href="{{ url_for('home.home') }}" style="font-weight: 600">Home</a>
                 </li>
+                {% if user_logged_in %}
+                <li class="nav-item">
+                  <a class="nav-link {% if active_page == 'dashboard.dashboard' %}active{% endif %}" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
+                </li>
+                {% endif %}
+                {% if not user_logged_in %}
                 <li class="nav-item">
                   <a class="nav-link {% if active_page == 'register.register' %}active{% endif %}"
                     href="{{ url_for('register.register') }}">Register</a>
@@ -66,6 +72,11 @@
                   <a class="nav-link {% if active_page == 'login.login' %}active{% endif %}"
                     href="{{ url_for('login.login') }}">Login</a>
                 </li>
+                {% else %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('logout.logout') }}">Logout</a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                   <a class="nav-link {% if active_page == 'contact_us.contact_us' %}active{% endif %}"
                     href="{{ url_for('contact_us.contact_us') }}">Contact Us</a>
@@ -162,7 +173,7 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-primary text-white text-center py-3">
+  <footer class="bg-primary text-white text-center py-3"  style="margin-top: auto;">
     <p>&copy; 2024 RailSaathi. All rights reserved.</p>
     <p>Contact Us: support@railsaathi.com</p>
     <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
