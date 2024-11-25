@@ -3,7 +3,7 @@ from flask import Blueprint, app, current_app, flash, render_template, redirect,
 from werkzeug.security import check_password_hash
 from app import get_session_config, set_session_config
 from app import db
-from app.models import Train, User # Import your User model
+from app.models import SessionConfig, Train, User # Import your User model
 from sqlalchemy import or_
 from functools import wraps
 
@@ -351,11 +351,26 @@ def history():
     return render_template('history.html', active_page='history.history')
 
 dashboard_bp=Blueprint('dashboard',__name__,template_folder="templates")
-@dashboard_bp.route('/dashboard')
+@dashboard_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     # Dashboard logic
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('login.login'))  # Redirect to login if not logged in
+    
     user_logged_in = 'user_id' in session  # Example check: Replace with your logic
-    return render_template('dashboard.html', user_logged_in=user_logged_in,active_page='dashboard.dashboard')
+    # Retrieve the logged-in user's details
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    if not user:
+        return redirect(url_for('login.login'))  # Redirect if user doesn't exist
+    
+    # Fetch user-specific session configurations and available trains
+    session_configs = SessionConfig.query.filter_by(user_id=user_id).all()
+    available_trains = Train.query.all()
+    
+    # Render the dashboard with user-specific data
+    return render_template('dashboard.html',user=user, configs=session_configs, trains=available_trains, user_logged_in=user_logged_in,active_page='dashboard.dashboard')
 
 # Consolidate all blueprints into a list
 all_blueprints = [
