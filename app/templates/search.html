@@ -93,36 +93,61 @@
             </nav>
         </div>
     </header>
-    <h1>Search Results</h1>
-    <p>From: {{ from_station }}</p>
-    <p>To: {{ to_station }}</p>
-    <p>Date: {{ date }}</p>
-    <p>Class: {{ travel_class }}</p>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Search Results</h2>
+        <p>From: {{ from_station }} | To: {{ to_station }} | Date: {{ date }} | Class: {{ travel_class }}</p>
+        {% if results %}
+        <div class="table-responsive" style="border-radius: 10px;">
+            <table class="table table-striped table-bordered" style="background-color: white;">
+                <thead>
+                    <tr>
+                        <th>Train Number</th>
+                        <th>Train Name</th>
+                        <th>Arrival Time</th>
+                        <th>Departure Time</th>
+                        <th>Duration</th>
+                        <th>Seats Available</th>
+                        <th>Class</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for train in results %}
+                    <tr>
+                        <td>{{ train.train_number }}</td>
+                        <td>{{ train.train_name }}</td>
+                        <td>{{ train.from_sta }}</td>
+                        <td>{{ train.from_std }}</td>
+                        <td>{{ train.duration }}</td>
+                        <td>{{ train.available_seats }}</td>
+                        <td>
+                            {% for class_type in train.class_type %}
+                            {% if class_type == travel_class %}
+                            {{ class_type }}
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('booking.booking', train_number=train.train_number, date=date) }}" 
+                               class="btn btn-primary btn-sm">Book</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">No trains found for the given criteria.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            No trains found for the selected route and date.
+        </div>
+        {% endif %}
+    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Train Name</th>
-                <th>Train Number</th>
-                <th>Departure</th>
-                <th>Arrival</th>
-                <th>Duration</th>
-                <th>Available Seats</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.train_name }}</td>
-                <td>{{ result.train_number }}</td>
-                <td>{{ result.departure_time }}</td>
-                <td>{{ result.arrival_time }}</td>
-                <td>{{ result.duration }}</td>
-                <td>{{ result.available_seats }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
     <!-- Footer -->
     <footer class="bg-primary text-white text-center py-3" style="margin-top: auto;">
         <p>&copy; 2024 RailSaathi. All rights reserved.</p>
@@ -138,6 +163,7 @@
                 Instagram</a>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

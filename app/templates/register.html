@@ -137,6 +137,35 @@
                 Instagram</a>
         </div>
     </footer>
+    <!-- Modal Component -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Registration Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {{ get_flashed_messages(category_filter=['danger'])|safe }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Automatically show the modal if there's a 'danger' flash message
+    document.addEventListener('DOMContentLoaded', function () {
+        const errorMessage = "{{ get_flashed_messages(category_filter=['danger'])|length > 0 }}";
+        if (errorMessage === "True") {
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+    });
+</script>
+
 </body>
 
 </html>

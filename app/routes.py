@@ -1,3 +1,5 @@
+import requests
+import openai
 import logging
 from flask import Blueprint, app, current_app, flash, render_template, redirect, request, session, url_for
 from werkzeug.security import check_password_hash
@@ -17,6 +19,15 @@ logging.basicConfig(level=logging.INFO)
 # @app.errorhandler(500)
 # def internal_server_error(e):
 #     return render_template('500.html'), 500
+
+def suggest_trains(user_input, train_list):
+    prompt = f"Given these trains {train_list} and user preferences {user_input}, suggest the best options."
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=150
+    )
+    return response['choices'][0]['text'].strip()
 
 def get_user_by_input(user_input):
     try:
@@ -47,6 +58,64 @@ def restrict_authenticated(func):
             return redirect(url_for('home.home'))
         return func(*args, **kwargs)
     return wrapper
+
+# Add this function to encapsulate the RapidAPI logic
+def fetch_live_station_data(from_station_code, to_station_code, date):
+    """Fetch live station data from IRCTC RapidAPI."""
+    url = "https://irctc1.p.rapidapi.com/api/v3/trainBetweenStations"
+    querystring = {
+        "fromStationCode": from_station_code,
+        "toStationCode": to_station_code,
+        "dateOfJourney": date
+        }
+    
+    headers = {
+        "x-rapidapi-key": "5f96361e56msh05fc25d2e8adcdbp12f1d7jsnee997d7bdfcc",
+        "x-rapidapi-host": "irctc1.p.rapidapi.com"
+        }
+    try:
+        response = requests.get(url, headers=headers, params=querystring)
+        response.raise_for_status()  # Raise an error for bad status codes
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        logging.error(f"HTTP Error: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected Error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching live station data: {e}")
+        return None
+
+# Add this function to encapsulate the RapidAPI logic
+def fetch_live_seat_availability_data(class_type,from_station_code,quota,to_station_code, date, train_number):
+    """Fetch seat availability data from IRCTC RapidAPI."""
+    url = "https://irctc1.p.rapidapi.com/api/v1/checkSeatAvailability"
+    querystring = {
+        "classType": class_type,
+        "fromStationCode": from_station_code,
+        "quota":quota,
+        "toStationCode": to_station_code,
+        "dateOfJourney": date,
+        "trainNo":train_number
+    }
+    headers = {
+        "x-rapidapi-key": "5f96361e56msh05fc25d2e8adcdbp12f1d7jsnee997d7bdfcc",  # Replace with your key
+        "x-rapidapi-host": "irctc1.p.rapidapi.com"
+    }
+    try:
+        response = requests.get(url, headers=headers, params=querystring)
+        response.raise_for_status()  # Raise an error for bad status codes
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        logging.error(f"HTTP Error: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected Error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching live station data: {e}")
+        return None
 
 # Define blueprints for different sections
 home_bp = Blueprint('home', __name__,template_folder="templates")  # Explicit template folder
@@ -155,6 +224,7 @@ search_bp = Blueprint('search', __name__,template_folder="templates")
 
 @search_bp.route('/search', methods=['GET','POST'])
 def search():
+    user_logged_in = 'user_id' in session  # Example check: Replace with your logic
     try:
         # Train search logic
         # Get query parameters
@@ -169,52 +239,39 @@ def search():
             # return redirect(url_for('home.home'))
             return render_template('error.html', message="Invalid search parameters.")
         
-        # Fetch search results (mock data here, replace with actual DB query or API call)
-        results = [
-            {
-                "train_name": "Rajdhani Express",
-                "train_number": "12345",
-                "departure_time": "08:00 AM",
-                "arrival_time": "04:00 PM",
-                "duration": "8h",
-                "available_seats": 50,
-                "travel_class": travel_class
-            },
-            {
-                "train_name": "Shatabdi Express",
-                "train_number": "54321",
-                "departure_time": "09:00 AM",
-                "arrival_time": "05:00 PM",
-                "duration": "8h",
-                "available_seats": 30,
-                "travel_class": travel_class
-            }
-        ]
+        # API integration to fetch train details
+        response = fetch_live_station_data(from_station, to_station, date)
+        print("API Response:", response)  # Debugging line
         
-        # Filter results based on travel class if necessary (mock filtering shown)
-        filtered_results = [result for result in results if result['travel_class'] == travel_class]
+        # Handle if the response is None or empty
+        if response is None or 'data' not in response or not response['data']:
+            flash("Unable to fetch train data. Please try again.", "danger")
+            return render_template('error.html', message="Error fetching train data.")
         
-        # Query database for train schedules
-        # results = Train.query.filter(
-        #     Train.from_station.ilike(f"%{from_station}%"),
-        #     Train.to_station.ilike(f"%{to_station}%"),
-        #     Train.date == date,
-        #     Train.travel_class.ilike(f"%{travel_class}%")
-        # ).paginate(page=request.args.get('page', 1, type=int), per_page=10)
+       # Process the response and display train data
+        train_data = response['data']
+        if not train_data:
+            flash("No trains found for the given search criteria.", "warning")
+            return render_template('error.html', message="No trains found.")
         
-        # Logic for handling the search query, for example, query the database or return results
-        # For now, we will just print the values to the console
-        print(f"Searching from {from_station} to {to_station} on {date} in class {travel_class}")
-        
+        #cond for seat availability according to class_type and travelling_class
+        l=len(train_data)
+        for i in range(l):
+            for train in train_data:
+                if train[i]['class_type']==travel_class:
+                    #seat availability logic by fetching data with new api and new fetch func
+                    response2=fetch_live_seat_availability_data(train[i][class_type],from_station_code,quota,to_station_code, date, train_number)
+                    total_fare_and_seat=
+                    pass
+
         # Render the search results page
         return render_template('search.html', 
+                               results=train_data,
                                from_station=from_station, 
                                to_station=to_station, 
                                date=date, 
                                travel_class=travel_class,
-                               results=filtered_results,
-                            #    results=results.items,
-                               pagination=results,
+                               user_logged_in=user_logged_in,
                                active_page='search.search')
     except Exception as e:
         current_app.logger.error(f"Error in search route: {str(e)}")
@@ -241,9 +298,9 @@ def login_route():
         else:  # Assume it's a username
             user_id = user_input
         
-         # Validate inputs
+        # Validate inputs
         if not (user_input and password):
-            flash("Please enter both credentials and password.", "danger")
+            flash("Please enter both credentials and password.", "warning")
             return render_template('login.html', active_page='login.login')
         
         # Check if user exists
@@ -342,7 +399,12 @@ booking_bp=Blueprint('booking',__name__,template_folder="templates")
 @booking_bp.route('/booking')
 def booking():
     # Booking logic
-    return render_template('booking.html', active_page='booking.booking')
+    train_number = request.args.get('train_number')
+    date = request.args.get('date')
+    if not train_number or not date:
+        flash("Invalid booking parameters. Please try again.", "danger")
+        return redirect(url_for('search.search'))
+    return render_template('booking.html', train_number=train_number, active_page='booking.booking')
 
 history_bp=Blueprint('history',__name__,template_folder="templates")
 @history_bp.route('/history')
