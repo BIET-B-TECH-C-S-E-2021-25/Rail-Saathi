@@ -88,7 +88,7 @@ def fetch_live_station_data(from_station_code, to_station_code, date):
         return None
 
 # Add this function to encapsulate the RapidAPI logic
-def fetch_live_seat_availability_data(class_type,from_station_code,quota,to_station_code, date, train_number):
+def fetch_live_seat_availability_data(class_type,from_station_code,quota,to_station_code, train_number, date):
     """Fetch seat availability data from IRCTC RapidAPI."""
     url = "https://irctc1.p.rapidapi.com/api/v1/checkSeatAvailability"
     querystring = {
@@ -258,14 +258,15 @@ def search():
         l=len(train_data)
         for i in range(l):
             for train in train_data:
-                for k in train[i]['class_type']:
-                    if train[i]['class_type'][k]==travel_class:
+                class_list=train[i]['class_type']
+                for k in class_list:
+                    if k==travel_class:
                         #seat availability logic by fetching data with new api and new fetch func
-                        response2=fetch_live_seat_availability_data(train[i]['class_type'][k],train[i]['from'],'GN',train[i]['to'], train[i]['train_date'], train[i]['train_number'])
+                        response2=fetch_live_seat_availability_data(k,train[i]['from'],'GN',train[i]['to'],train[i]['train_number'], train[i]['train_date'])
                         total_fare_and_seat=response2['data']
                         l2=len(total_fare_and_seat)
                         for j in range(l2):
-                            if total_fare_and_seat[j]['class_type']==train[i]['class_type'][k]:
+                            if total_fare_and_seat[j]['date']==train[i]['train_date']:
                                 sa=[{
                                     # 'total_fare':total_fare_and_seat[j]['total_fare'],
                                     'available_seat':total_fare_and_seat[j]['current_status']
