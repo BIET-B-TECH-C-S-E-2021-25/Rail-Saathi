@@ -96,8 +96,8 @@ def fetch_live_seat_availability_data(class_type,from_station_code,quota,to_stat
         "fromStationCode": from_station_code,
         "quota":quota,
         "toStationCode": to_station_code,
-        "dateOfJourney": date,
-        "trainNo":train_number
+        "trainNo":train_number,
+        "dateOfJourney": date
     }
     headers = {
         "x-rapidapi-key": "5f96361e56msh05fc25d2e8adcdbp12f1d7jsnee997d7bdfcc",  # Replace with your key
