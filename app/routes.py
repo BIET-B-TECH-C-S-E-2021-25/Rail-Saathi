@@ -258,11 +258,18 @@ def search():
         l=len(train_data)
         for i in range(l):
             for train in train_data:
-                if train[i]['class_type']==travel_class:
-                    #seat availability logic by fetching data with new api and new fetch func
-                    response2=fetch_live_seat_availability_data(train[i][class_type],from_station_code,quota,to_station_code, date, train_number)
-                    total_fare_and_seat=
-                    pass
+                for k in train[i]['class_type']:
+                    if train[i]['class_type'][k]==travel_class:
+                        #seat availability logic by fetching data with new api and new fetch func
+                        response2=fetch_live_seat_availability_data(train[i]['class_type'][k],train[i]['from'],'GN',train[i]['to'], train[i]['train_date'], train[i]['train_number'])
+                        total_fare_and_seat=response2['data']
+                        l2=len(total_fare_and_seat)
+                        for j in range(l2):
+                            if total_fare_and_seat[j]['class_type']==train[i]['class_type'][k]:
+                                sa=[{
+                                    # 'total_fare':total_fare_and_seat[j]['total_fare'],
+                                    'available_seat':total_fare_and_seat[j]['current_status']
+                                    }]
 
         # Render the search results page
         return render_template('search.html', 
@@ -271,6 +278,7 @@ def search():
                                to_station=to_station, 
                                date=date, 
                                travel_class=travel_class,
+                               available_seats=sa,
                                user_logged_in=user_logged_in,
                                active_page='search.search')
     except Exception as e:

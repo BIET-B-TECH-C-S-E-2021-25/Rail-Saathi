@@ -119,7 +119,7 @@
                         <td>{{ train.from_sta }}</td>
                         <td>{{ train.from_std }}</td>
                         <td>{{ train.duration }}</td>
-                        <td>{{ train.available_seats }}</td>
+                        <td>{{ available_seats.current_status }}</td>
                         <td>
                             {% for class_type in train.class_type %}
                             {% if class_type == travel_class %}
