@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 import openai
 import logging
@@ -99,20 +100,17 @@ def fetch_live_seat_availability_data(class_type,from_station_code,quota,to_stat
         "trainNo":train_number,
         "dateOfJourney": date
     }
+    
     headers = {
         "x-rapidapi-key": "5f96361e56msh05fc25d2e8adcdbp12f1d7jsnee997d7bdfcc",  # Replace with your key
         "x-rapidapi-host": "irctc1.p.rapidapi.com"
     }
+    
     try:
-        response = requests.get(url, headers=headers, params=querystring)
-        response.raise_for_status()  # Raise an error for bad status codes
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        logging.error(f"HTTP Error: {e}")
-        return None
-    except Exception as e:
-        logging.error(f"Unexpected Error: {e}")
-        return None
+        response2 = requests.get(url, headers=headers, params=querystring)
+        response2.raise_for_status()  # Raise an error for bad status codes
+        return response2.json()
+    
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching live station data: {e}")
         return None
@@ -232,7 +230,7 @@ def search():
         to_station = request.args.get('to_station')
         date = request.args.get('date')
         travel_class = request.args.get('travel_class')
-
+        
         # Validate query parameters
         if not all([from_station, to_station, date, travel_class]):
             flash("Invalid search parameters. Please try again.", "danger")
@@ -241,7 +239,7 @@ def search():
         
         # API integration to fetch train details
         response = fetch_live_station_data(from_station, to_station, date)
-        print("API Response:", response)  # Debugging line
+        # print("API Response:", response)  # Debugging line
         
         # Handle if the response is None or empty
         if response is None or 'data' not in response or not response['data']:
@@ -254,32 +252,74 @@ def search():
             flash("No trains found for the given search criteria.", "warning")
             return render_template('error.html', message="No trains found.")
         
-        #cond for seat availability according to class_type and travelling_class
-        l=len(train_data)
-        for i in range(l):
-            for train in train_data:
-                class_list=train[i]['class_type']
-                for k in class_list:
-                    if k==travel_class:
-                        #seat availability logic by fetching data with new api and new fetch func
-                        response2=fetch_live_seat_availability_data(k,train[i]['from'],'GN',train[i]['to'],train[i]['train_number'], train[i]['train_date'])
-                        total_fare_and_seat=response2['data']
-                        l2=len(total_fare_and_seat)
-                        for j in range(l2):
-                            if total_fare_and_seat[j]['date']==train[i]['train_date']:
-                                sa=[{
-                                    # 'total_fare':total_fare_and_seat[j]['total_fare'],
-                                    'available_seat':total_fare_and_seat[j]['current_status']
-                                    }]
+        # d_date=train
+        # print("d_date:",d_date)
+        # # Ensure the date format is correct
+        # if d_date:
+        #     try:
+        #         date_object = datetime.strptime(d_date, "%d-%m-%Y")
+        #         formatted_date = date_object.strftime("%Y-%m-%d")  # Convert to YYYY-MM-DD format
+        #     except ValueError:
+        #         flash("Invalid date format. Please use DD-MM-YYYY.", "danger")
+        #         return render_template('error.html', message="Invalid date format.")
+        # else:
+        #     flash("Date parameter is missing.", "danger")
+        #     return render_template('error.html', message="Missing date parameter.")
+                
+        # # Initialize list to store available seat information
+        # available_seats = []
 
-        # Render the search results page
-        return render_template('search.html', 
+        # # Loop through train data and fetch seat availability
+        # for train in train_data:
+        #     class_list = train.get('class_type')
+        #     for class_type in class_list:
+        #         if class_type == travel_class:
+        #             # Fetch seat availability data for the specific train and class type
+        #             response2 = fetch_live_seat_availability_data(
+        #                 class_type, 
+        #                 train['from'], 
+        #                 'GN',  # Assuming quota is 'GN'; adjust as necessary
+        #                 train['to'], 
+        #                 train['train_number'], 
+        #                 formatted_date
+        #             )
+        #             if response2 and 'data' in response2:
+        #                 total_fare_and_seat = response2['data']
+        #                 for seat_info in total_fare_and_seat:
+        #                     if seat_info['date'] == train['train_date']:
+        #                         available_seats.append({
+        #                             'train_number': train['train_number'],
+        #                             'available_seat': seat_info['current_status'],
+        #                             'date': seat_info['date']
+        #                         })
+        # # Combine train data and seat availability information
+        # results = []
+        # for train in train_data:
+        #     train_info = {
+        #         'train_number': train['train_number'],
+        #         'train_name': train['train_name'],
+        #         'from_station': train['from'],
+        #         'to_station': train['to'],
+        #         'train_date': train['train_date'],
+        #         'available_seats': []  # Initialize available seats for this train
+        #     }
+
+        #     # Find corresponding available seats for this train
+        #     for seat_info in available_seats:
+        #         if seat_info['train_number'] == train['train_number']:
+        #             train_info['available_seats'].append(seat_info)
+
+        #     results.append(train_info)
+            
+        # Render the search results page with the fetched data
+        return render_template('search.html',
+                            #    results=results,
                                results=train_data,
+                            #    available_seats=available_seats,
                                from_station=from_station, 
                                to_station=to_station, 
                                date=date, 
                                travel_class=travel_class,
-                               available_seats=sa,
                                user_logged_in=user_logged_in,
                                active_page='search.search')
     except Exception as e:

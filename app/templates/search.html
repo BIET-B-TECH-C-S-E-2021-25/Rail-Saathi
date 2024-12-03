@@ -106,7 +106,7 @@
                         <th>Arrival Time</th>
                         <th>Departure Time</th>
                         <th>Duration</th>
-                        <th>Seats Available</th>
+                        <!-- <th>Seats Available</th> -->
                         <th>Class</th>
                         <th>Actions</th>
                     </tr>
@@ -119,13 +119,25 @@
                         <td>{{ train.from_sta }}</td>
                         <td>{{ train.from_std }}</td>
                         <td>{{ train.duration }}</td>
-                        <td>{{ available_seats.current_status }}</td>
-                        <td>
-                            {% for class_type in train.class_type %}
-                            {% if class_type == travel_class %}
-                            {{ class_type }}
-                            {% endif %}
+                        <!-- <td>
+                            {% for available_seat in available_seats %}
+                                {% if available_seat.date == date %}
+                                    {{ available_seat.current_status }}
+                                {% endif %}
                             {% endfor %}
+                        </td> -->
+                        <td>
+                            {% set matched_classes = [] %}
+                            {% for class_type in train.class_type %}
+                                {% if class_type == travel_class %}
+                                    <span>{{ class_type }}</span>
+                                {% else %}
+                                    {% set matched_classes = matched_classes + [class_type] %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if matched_classes %}
+                                <span>Other classes: {{ matched_classes | join(', ') }}</span>
+                            {% endif %}
                         </td>
                         <td>
                             <a href="{{ url_for('booking.booking', train_number=train.train_number, date=date) }}" 
@@ -133,10 +145,10 @@
                         </td>
                     </tr>
                     {% else %}
-                <tr>
-                    <td colspan="7" class="text-center">No trains found for the given criteria.</td>
-                </tr>
-                {% endfor %}
+                    <tr>
+                        <td colspan="8" class="text-center">No trains found for the given criteria.</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -146,7 +158,7 @@
         </div>
         {% endif %}
     </div>
-
+    <p>{{ results | tojson }}</p>
 
     <!-- Footer -->
     <footer class="bg-primary text-white text-center py-3" style="margin-top: auto;">
