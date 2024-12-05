@@ -23,7 +23,7 @@
 - **Database**: SQLite with SQLAlchemy ORM
 - **Frontend**: HTML, CSS, JavaScript
 - **AI Model**: Machine learning algorithms for seat suggestions
-- **Deployment**: Render, Heroku
+- **Deployment**: Render
 
 ---
 
@@ -101,15 +101,12 @@ This project uses **Python 3.13.0**. Please ensure that you are using this versi
 1. Add a `.env` file with your environment variables:
    ```plaintext
    DB_URI=sqlite:///railsathi.db
+   DATABASE_URL=sqlite:///railsaathi.db
+   SECRET_KEY=your_secret_key
+   FLASK_APP=app.app
    ```
 2. Update the `render.yaml` with necessary deployment configurations.
 3. Push the changes to your repository and link it with Render.
-
-### Heroku
-
-1. Create a Heroku application.
-2. Add your environment variables in the Heroku dashboard.
-3. Deploy using the Heroku CLI or GitHub integration.
 
 ---
 
@@ -118,6 +115,9 @@ This project uses **Python 3.13.0**. Please ensure that you are using this versi
 - Make sure `.env` is added to `.gitignore` for security.
 - Required variables:
   - `DB_URI`: SQLite database connection string.
+  - `DATABASE_URL`: SQLite database connection string.
+  - `SECRET_KEY`: Your secret key for Flask application.
+  - `FLASK_APP`: Entry point of your Flask application.
 
 ---
 
