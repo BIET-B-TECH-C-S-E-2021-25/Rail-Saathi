@@ -27,13 +27,7 @@
 
 ---
 
-## Python Version
-
-This project uses **Python 3.13.0**. Please ensure that you are using this version when setting up the project locally or when deploying it. The `render.yaml` file in the project specifies this version for deployment on Render.
-
----
-
-## Getting Started
+## Setup and Installation
 
 ### Prerequisites
 
