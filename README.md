@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**RailSaathi** is an AI-powered railway assistance system that simplifies ticket booking for the Indian Railways. It features user authentication, train search, real-time seat booking, and AI-driven suggestions. Built with Flask, MySQL, and JavaScript, this project aims to enhance user experience and streamline railway operations. Deployable on Render.
+**RailSaathi** is an AI-powered railway assistance system that simplifies ticket booking for the Indian Railways. It features user authentication, train search, real-time seat booking, and AI-driven suggestions. Built with Flask, SQLite, and JavaScript, this project aims to enhance user experience and streamline railway operations. Deployable on Render.
 
 ---
 
@@ -20,16 +20,16 @@
 ## Technologies Used
 
 - **Backend**: Flask (Python)
-- **Database**: MySQL with SQLAlchemy ORM
+- **Database**: SQLite with SQLAlchemy ORM
 - **Frontend**: HTML, CSS, JavaScript
 - **AI Model**: Machine learning algorithms for seat suggestions
-- **Deployment**: 
+- **Deployment**: Render, Heroku
 
 ---
 
 ## Python Version
 
-This project uses **Python 3.12.6**. Please ensure that you are using this version when setting up the project locally or when deploying it. The `runtime.txt` file in the project specifies this version for deployment on Render.
+This project uses **Python 3.13.0**. Please ensure that you are using this version when setting up the project locally or when deploying it. The `render.yaml` file in the project specifies this version for deployment on Render.
 
 ---
 
@@ -37,8 +37,8 @@ This project uses **Python 3.12.6**. Please ensure that you are using this versi
 
 ### Prerequisites
 
-- Python 3.12.6 installed
-- MySQL server installed
+- Python 3.13.0 installed
+- SQLite3 installed
 - Git installed
 
 ### Steps to Run Locally
@@ -76,9 +76,9 @@ This project uses **Python 3.12.6**. Please ensure that you are using this versi
      ```sql
      railsaathi.sql
      ```
-   - Update the `.env` file with your MySQL credentials:
+   - Update the `.env` file with your SQLite credentials:
      ```plaintext
-     DB_URI=mysql+pymysql://root:password@localhost/railsathi
+     DB_URI=sqlite:///railsathi.db
      ```
 
 6. **Run the application**:
@@ -100,7 +100,7 @@ This project uses **Python 3.12.6**. Please ensure that you are using this versi
 
 1. Add a `.env` file with your environment variables:
    ```plaintext
-   DB_URI=mysql+pymysql://root:password@localhost/railsathi
+   DB_URI=sqlite:///railsathi.db
    ```
 2. Update the `render.yaml` with necessary deployment configurations.
 3. Push the changes to your repository and link it with Render.
@@ -117,7 +117,7 @@ This project uses **Python 3.12.6**. Please ensure that you are using this versi
 
 - Make sure `.env` is added to `.gitignore` for security.
 - Required variables:
-  - `DB_URI`: MySQL database connection string.
+  - `DB_URI`: SQLite database connection string.
 
 ---
 
