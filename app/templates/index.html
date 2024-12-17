@@ -98,7 +98,8 @@
         <form class="search-bar" action="{{ url_for('home.home') }}" method="POST">
           <!-- CSRF Token -->
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-           <div class="form-group">
+          
+          <div class="form-group">
             <label for="from">From:</label><br />
             <input type="text" id="from" name="from" placeholder="Enter departure location" style="border: 1.5px solid #1f4e79" />
           </div>
@@ -174,14 +175,68 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-primary text-white text-center py-3" style="margin-top: auto;">
-    <p>&copy; 2024 RailSaathi. All rights reserved.</p>
-    <p>Contact Us: support@railsaathi.com</p>
-    <p><a href="#" class="text-white text-decoration-none">Privacy Policy</a> | <a href="#" class="text-white text-decoration-none">Terms of Service</a></p>
-    <div class="mt-2">
-        <a href="https://facebook.com" target="_blank" class="text-white me-2"><i class="bi bi-facebook"></i> Facebook</a>
-        <a href="https://twitter.com" target="_blank" class="text-white me-2"><i class="bi bi-twitter"></i> Twitter</a>
-        <a href="https://instagram.com" target="_blank" class="text-white"><i class="bi bi-instagram"></i> Instagram</a>
+  <footer class="text-center text-lg-start bg-light text-muted">
+    <section class="">
+        <div class="container text-center text-md-start mt-5">
+            <div class="row mt-3">
+                <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+                    <h6 class="text-uppercase fw-bold">RailSaathi</h6>
+                    <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #7c4dff; height: 2px"
+                    />
+                    <p>
+                        RailSaathi is a web application that helps users to book train tickets and plan their journey
+                        with ease.
+                    </p>
+                </div>
+                <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+                    <h6 class="text-uppercase fw-bold">Useful Links</h6>
+                    <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #7c4dff; height: 2px"
+                    />
+                    <p>
+                        <a href="{{ url_for('home.home') }}" class="text-muted">Home</a>
+                    </p>
+                    <p>
+                        <a href="{{ url_for('search.search') }}" class="text-muted">Search Trains</a>
+                    </p>
+                    <p>
+                        <a href="{{ url_for('contact_us.contact_us') }}" class="text-muted">Contact Us</a>
+                    </p>
+                </div>
+                <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+                    <h6 class="text-uppercase fw-bold">Contact</h6>
+                    <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #7c4dff; height: 2px"
+                    />
+                    <p><i class="bi bi-house-door"></i> 123, Railway Station Road, Bangalore, India</p>
+                    <p>
+                        <i class="bi bi-envelope"></i>
+                        <a href="mailto:support@railsaathi.com" title="Email Support">support@railsaathi.com</a>
+                    </p>
+                </div>
+                <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+                    <h6 class="text-uppercase fw-bold">Follow Us</h6>
+                    <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #7c4dff; height: 2px"
+                    />
+                    <p>
+                        <a href="#" class="me-4 text-reset">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="me-4 text-reset">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="me-4 text-reset">
+                            <i class="bi bi-google"></i>
+                        </a>
+                        <a href="#" class="me-4 text-reset">
+                            <i class="bi bi-link"></i>
+                        </a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+        © 2021 RailSaathi:<a class="text-reset" href="https://rail-saathi.onrender.com">rail-saathi.onrender.com</a>
     </div>
 </footer>
 </body>

@@ -70,5 +70,22 @@ class SessionConfig(db.Model):
     def __repr__(self):
         return f"<SessionConfig {self.key}={self.value}>"
 
+
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    from_station = db.Column(db.String(100), nullable=False)
+    to_station = db.Column(db.String(100), nullable=False)
+    travel_class = db.Column(db.String(50), nullable=False)
+    passenger_name = db.Column(db.String(100), nullable=False)
+    passenger_age = db.Column(db.Integer, nullable=False)
+    passenger_gender = db.Column(db.String(20), nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    user = db.relationship('User', backref=db.backref('bookings', lazy=True))
+
+    def __repr__(self):
+        return f"<Booking {self.id} for user {self.user_id}"
+
 # Create the table (or run migrations to create it)
 # db.create_all()

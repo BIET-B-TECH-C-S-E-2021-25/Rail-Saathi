@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <!-- Include necessary CSS for styling flash messages -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+    </style>
+
+    <!-- Include necessary JS for redirecting to dashboard after a brief delay -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+
+            <!-- Display flash messages using Bootstrap alert -->
+
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <!-- Redirect to dashboard after a brief delay -->
+        <script>
+            // Replace 'booking.id' with the actual booking ID passed to the template
+            setTimeout(function(){
+                window.location.href = "{{ url_for('dashboard.dashboard', booking_id=booking_id) }}";
+            }, 3000);  // Redirects after 3 seconds
+        </script>
+      {% endif %}
+    {% endwith %}
+</body>
+</html>
